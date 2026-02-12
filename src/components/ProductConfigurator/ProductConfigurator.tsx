@@ -190,10 +190,30 @@ export const ProductConfigurator: React.FC<ProductConfiguratorProps> = ({
   const appliedDiscount = getAppliedDiscountPercentage(quantity);
   const nextTier = getNextDiscountTier(quantity);
 
+  const handleQuickAddShortcut = useCallback(
+    (e: KeyboardEvent) => {
+      if (!price || !onAddToCart) return;
+
+      const isShortcut = e.key === "Enter" && e.ctrlKey;
+
+      if (isShortcut) {
+        onAddToCart(currentConfig, price);
+      }
+    },
+    [currentConfig, onAddToCart, price],
+  );
   // -------------------------------------------------------------------------
   // Effects
   // -------------------------------------------------------------------------
 
+  useEffect(() => {
+    window.addEventListener("keydown", handleQuickAddShortcut);
+
+    return () => {
+      window.removeEventListener("keydown", handleQuickAddShortcut);
+    };
+  }, [handleQuickAddShortcut]);
+  
   useEffect(() => {
     const handleResize = () => {
       if (colorPickerRef.current) {
@@ -285,6 +305,15 @@ export const ProductConfigurator: React.FC<ProductConfiguratorProps> = ({
       }
     }
   }, []);
+
+  useEffect(() => {
+    window.addEventListener("keydown", handleQuickAddShortcut);
+
+    // cleanup on unmount
+    return () => {
+      window.removeEventListener("keydown", handleQuickAddShortcut);
+    };
+  }, [handleQuickAddShortcut]);
 
   // -------------------------------------------------------------------------
   // Event Handlers
@@ -399,10 +428,14 @@ export const ProductConfigurator: React.FC<ProductConfiguratorProps> = ({
   }, [validation, price, currentConfig, onAddToCart]);
 
   const handleQuickAdd = useCallback(() => {
-    if (price && onAddToCart) {
-      onAddToCart(currentConfig, price);
-    }
-  }, [price, currentConfig, onAddToCart]);
+      if (price && onAddToCart) {
+        onAddToCart(currentConfig, price);
+      }
+    },
+    [price, currentConfig, onAddToCart],
+  );
+
+  
 
   const handleCopyShareUrl = useCallback(() => {
     navigator.clipboard
@@ -919,9 +952,7 @@ export const ProductConfigurator: React.FC<ProductConfiguratorProps> = ({
             className={`price-display ${isPriceLoading ? "price-loading" : ""}`}
           >
             <div className="price-label">Total Price</div>
-            <div className="price-value">
-              {formattedTotal}
-            </div>
+            <div className="price-value">{formattedTotal}</div>
 
             {renderPriceBreakdown()}
 
@@ -929,6 +960,7 @@ export const ProductConfigurator: React.FC<ProductConfiguratorProps> = ({
               <button
                 className="quick-add-btn"
                 onClick={handleQuickAdd}
+                onKeyDown={handleQuickAddShortcut}
                 disabled={readOnly || !validation?.valid}
               >
                 ⚡ Quick Add to Cart

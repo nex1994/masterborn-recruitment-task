@@ -47,6 +47,7 @@ export function calculatePriceBreakdown(
     }
   }
 
+
   // Calculate subtotal
   const optionTotal = optionModifiers.reduce((sum, mod) => sum + mod.amount, 0);
   const addOnTotal = addOnCosts.reduce((sum, cost) => sum + cost.amount, 0);
@@ -56,7 +57,7 @@ export function calculatePriceBreakdown(
   // Calculate quantity discount
   let discountRate = 0;
   for (const tier of QUANTITY_DISCOUNT_TIERS) {
-    if (config.quantity > tier.minQuantity) {
+    if (config.quantity >= tier.minQuantity) {
       discountRate = tier.discount;
       break;
     }
@@ -90,7 +91,7 @@ export function formatPrice(amount: number, currency: string = 'USD'): string {
  */
 export function getAppliedDiscountPercentage(quantity: number): number {
   for (const tier of QUANTITY_DISCOUNT_TIERS) {
-    if (quantity > tier.minQuantity) {
+    if (quantity >= tier.minQuantity) {
       return tier.discount * 100;
     }
   }

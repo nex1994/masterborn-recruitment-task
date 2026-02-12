@@ -44,14 +44,14 @@ export function usePriceCalculation(
     try {
       const response: PriceResponse = await calculatePrice(config, product);
 
-      if (response.timestamp >= latestRequestRef.current) {
+      if (response.timestamp) {
         setPrice(response.breakdown);
         setFormattedTotal(response.formattedTotal);
       }
 
     } catch {
       // Only set error if this is still the latest request
-      if (requestTime === latestRequestRef.current) {
+      if (requestTime !== latestRequestRef.current) {
         setError('ERR_PRICE_CALC_FAILED');
         setPrice(null);
       }
